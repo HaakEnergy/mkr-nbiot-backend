@@ -26,6 +26,24 @@ def receive():
     conn.close()
     return jsonify({"status":"ok"})
 
+def receive_data():
+    try:
+        data = request.get_json(force=True)
+        print("Empfangen:", data)
+
+        if not data:
+            return jsonify({"error": "no data received"}), 400
+
+        with open("data.txt", "a") as f:
+            json.dump(data, f)
+            f.write("\n")
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        print("Fehler beim Verarbeiten:", e)
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/data', methods=['GET'])
 def send():
     device = request.args.get('device')
