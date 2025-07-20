@@ -1,12 +1,9 @@
 from flask import Flask, request, jsonify
 import sqlite3
-import os
-from datetime import datetime
 
 app = Flask(__name__)
 DB_PATH = "data.db"
 
-# Init DB on startup
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -33,10 +30,8 @@ def receive_data():
     try:
         data = request.get_json(force=True)
         print("Empfangen:", data)
-
         if not data:
             return jsonify({"error": "no data received"}), 400
-
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute("INSERT INTO measurements (device, timestamp, signal, temperature) VALUES (?, ?, ?, ?)", (
@@ -47,9 +42,7 @@ def receive_data():
         ))
         conn.commit()
         conn.close()
-
         return jsonify({"status": "success"}), 200
-
     except Exception as e:
         print("Fehler:", e)
         return jsonify({"error": str(e)}), 500
@@ -61,7 +54,6 @@ def get_data():
     c.execute("SELECT * FROM measurements ORDER BY id DESC LIMIT 100")
     rows = c.fetchall()
     conn.close()
-
     return jsonify([
         {"id": r[0], "device": r[1], "timestamp": r[2], "signal": r[3], "temperature": r[4]}
         for r in rows
